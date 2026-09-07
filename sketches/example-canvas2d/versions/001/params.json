@@ -1,0 +1,11 @@
+{
+  "params": {
+    "seed": 1,
+    "count": 18,
+    "amplitude": 0.08,
+    "frequency": 8,
+    "ink": "#1c1612",
+    "paper": "#f4f1e8"
+  },
+  "createdAt": "2026-09-02T19:29:51.904Z"
+}

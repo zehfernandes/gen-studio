@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Generated exports inside each sketch (stills, videos, sequences, sidecars)
+sketches/**/exports/
+
+# Legacy flat exports from before the exports/ folder
+sketches/**/export-*.png
+sketches/**/export-*.txt
+sketches/**/export-*.mp4
+
+# Secrets
+.env
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/

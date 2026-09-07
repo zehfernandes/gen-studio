@@ -1,0 +1,16 @@
+{
+  "params": {
+    "seed": 1,
+    "count": 78,
+    "radius": 0.07,
+    "size": 18,
+    "color": "#ff5c33",
+    "bg": "#101010"
+  },
+  "size": {
+    "width": 1080,
+    "height": 1080,
+    "resolution": 1
+  },
+  "createdAt": "2026-09-04T05:27:52.323Z"
+}

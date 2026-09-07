@@ -1,0 +1,441 @@
+/* gen-studio layout + lil-gui theme */
+
+:root {
+  --bg: #101010;
+  --border: #222222;
+  --text: #f4f1e8;
+  --muted: #8f8f8f;
+  --accent: #ffffff;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  font-size: 12px;
+  overflow: hidden;
+}
+
+#gen-studio {
+  display: grid;
+  grid-template-columns: 280px 1fr 300px;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+#sidebar {
+  overflow-y: auto;
+  padding: 12px;
+}
+
+#stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background: var(--bg);
+  touch-action: none; /* touch/pen drags reach the sketch as pointer events instead of scrolling */
+}
+
+#stage canvas {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  user-select: none;
+}
+
+#params {
+  overflow-y: auto;
+  position: relative;
+}
+
+#params.hidden {
+  display: none;
+}
+
+#status {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 14px;
+  background: rgba(28, 28, 28, 0.9);
+  color: var(--text);
+  font-family: "Berkeley Mono", "Berkeley Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+/* sidebar chrome */
+
+#sidebar-head {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+#sketch-select {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  height: 34px;
+  padding: 0 28px 0 10px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #202020 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23ffffff' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 10px center;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font: 11px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  text-align: left;
+  cursor: pointer;
+}
+
+#sketch-select selectedcontent {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#sketch-select:focus {
+  outline: none;
+  background-color: #282828;
+}
+
+/* Customizable select (Chrome 135+): style the popup like the panel rows. Other browsers keep the native menu. */
+
+#sketch-select,
+#sketch-select::picker(select) {
+  appearance: base-select;
+}
+
+#sketch-select::picker-icon {
+  display: none;
+}
+
+#sketch-select:open {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 5l4-4 4 4' fill='none' stroke='%23ffffff' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+#sketch-select::picker(select) {
+  margin-top: 4px;
+  padding: 4px;
+  background: #202020;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+  font: inherit;
+}
+
+#sketch-select option {
+  height: 34px;
+  padding: 0 10px;
+  font: inherit;
+  line-height: 34px;
+  border-radius: 8px;
+  color: #ffffff;
+}
+
+#sketch-select option:hover,
+#sketch-select option:focus-visible {
+  background: #282828;
+  outline: none;
+}
+
+#sketch-select option:checked {
+  background: #303030;
+}
+
+#sketch-select option::checkmark {
+  display: none;
+}
+
+.versions-empty {
+  color: var(--muted);
+  font-size: 11px;
+  padding: 8px 0;
+}
+
+.version {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 6px;
+}
+
+.version:hover {
+  background: #1f1f1f;
+}
+
+.version.active {
+  background: #252525;
+}
+
+.version img {
+  width: 72px;
+  height: 54px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: #222;
+}
+
+.version-id {
+  font-size: 11px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.version-delete {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0;
+  padding: 4px;
+}
+
+.version:hover .version-delete {
+  opacity: 1;
+}
+
+.version-delete:hover {
+  color: #ff6b6b;
+}
+
+/* lil-gui theme
+   lil-gui re-declares its custom properties on every .lil-gui element (folders included), so a
+   theme must target nested folders too or the values never reach the controllers. */
+
+.gen-studio.lil-gui,
+.gen-studio .lil-gui {
+  --row: 34px;
+  --value: #ffffff;
+  --pill: #111111;
+
+  --width: 100%;
+  --background-color: transparent;
+  --text-color: #757575;
+  --widget-color: #202020;
+  --hover-color: #282828;
+  --focus-color: #323232;
+  --number-color: var(--value);
+  --string-color: var(--value);
+  --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  --widget-border-radius: 10px;
+  --widget-padding: 0;
+  --name-width: auto;
+  --folder-indent: 0px;
+  --slider-input-width: 45px;
+  --color-input-width: 52px;
+  --checkbox-size: calc(var(--row) - 10px);
+}
+
+.gen-studio.lil-root {
+  padding: 8px 4px 6px;
+}
+
+.gen-studio.lil-root > .lil-title {
+  display: none;
+}
+
+.gen-studio .lil-gui > .lil-title,
+.gen-studio.lil-root > .lil-children > .lil-gui > .lil-title {
+  height: auto;
+  line-height: 1.2;
+  padding: 4px 8px;
+  border: none;
+  font-weight: 500;
+  color: #8f8f8f;
+}
+
+/* rows: every widget is a full-width pill with the name inside it */
+
+.gen-studio .lil-controller {
+  padding: 2px 0;
+}
+
+.gen-studio .lil-controller > .lil-name {
+  padding-left: 10px;
+}
+
+.gen-studio .lil-controller .lil-widget {
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.gen-studio .lil-controller.lil-number,
+.gen-studio .lil-controller.lil-option,
+.gen-studio .lil-controller.lil-boolean,
+.gen-studio .lil-controller.lil-color,
+.gen-studio .lil-controller.lil-string {
+  border-radius: var(--widget-border-radius);
+  background: var(--widget-color);
+  min-height: var(--row);
+}
+
+.gen-studio .lil-controller.lil-number:not(.lil-has-slider) .lil-widget,
+.gen-studio .lil-controller.lil-option .lil-widget {
+  padding-right: 6px;
+}
+
+.gen-studio .lil-controller.lil-string input {
+  padding-right: 10px;
+  text-align: right;
+}
+
+/* slider: the track fills the row, name and value float on top of it */
+
+.gen-studio .lil-controller.lil-number.lil-has-slider {
+  position: relative;
+  overflow: hidden;
+}
+
+.gen-studio .lil-controller.lil-number.lil-has-slider > .lil-name {
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.gen-studio .lil-controller.lil-number.lil-has-slider .lil-widget {
+  position: absolute;
+  inset: 0;
+}
+
+.gen-studio .lil-controller.lil-number.lil-has-slider .lil-slider {
+  height: 100%;
+  padding-right: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.gen-studio .lil-controller.lil-number.lil-has-slider .lil-fill {
+  background: #303030;
+  opacity: 1;
+}
+
+.gen-studio .lil-controller.lil-number.lil-has-slider input {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  z-index: 2;
+  margin: 0;
+  transform: translateY(-50%);
+  text-align: right;
+  background: transparent;
+}
+
+/* plain numbers and color hex: a darker pill inside the row */
+
+.gen-studio .lil-controller.lil-number:not(.lil-has-slider) input,
+.gen-studio .lil-controller.lil-color input[type="text"] {
+  margin: 0;
+  background: var(--pill);
+  color: var(--value);
+}
+
+.gen-studio .lil-controller.lil-number:not(.lil-has-slider) input {
+  width: var(--slider-input-width);
+  text-align: right;
+}
+
+.gen-studio .lil-controller.lil-color input[type="text"] {
+  text-align: center;
+}
+
+/* dropdown */
+
+.gen-studio .lil-controller.lil-option .lil-display {
+  flex: 1;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 6px;
+  text-align: right;
+  color: var(--value);
+  background: transparent;
+}
+
+.gen-studio .lil-controller.lil-option .lil-display::after {
+  display: none;
+}
+
+/* boolean: a square that fills when checked */
+
+.gen-studio .lil-controller.lil-boolean > .lil-name {
+  flex: 1;
+}
+
+.gen-studio .lil-controller.lil-boolean .lil-widget {
+  width: auto;
+  padding-right: 10px;
+}
+
+.gen-studio .lil-controller.lil-boolean input[type="checkbox"] {
+  position: relative;
+  background: transparent;
+  box-shadow: none;
+}
+
+.gen-studio .lil-controller.lil-boolean input[type="checkbox"]:checked::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  background: var(--value);
+  border-radius: 3px;
+}
+
+/* color swatch */
+
+.gen-studio .lil-controller.lil-color .lil-widget {
+  gap: 6px;
+  padding-right: 8px;
+}
+
+.gen-studio .lil-controller.lil-color .lil-display {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+}
+
+/* buttons */
+
+.gen-studio .lil-controller.lil-function {
+  padding: 0;
+}
+
+.gen-studio .lil-controller.lil-function + .lil-controller.lil-function {
+  margin-top: 2px;
+}
+
+.gen-studio .lil-controller button {
+  min-height: var(--row);
+  font-size: 13px;
+}
+
+.gen-studio .lil-controller button:hover,
+.gen-studio .lil-controller button:active {
+  color: var(--value);
+}
