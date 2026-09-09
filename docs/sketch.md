@@ -113,7 +113,7 @@ Sizes are pixels. The **Size** folder has a preset dropdown plus `width`, `heigh
 
 - `width × height` are the design pixels your code draws in.
 - `resolution` multiplies the output. `2` gives a @2x file of the same picture; `0.5` a quick draft.
-- Presets cover print at 300 dpi (`A5`–`A1`, `Letter`, `Tabloid`, `18x24in`, `24x36in`) and social (`Instagram post/portrait/story`, `TikTok`, `YouTube`, `YouTube short`, `X post`, `4K`).
+- Presets are print at 300 dpi (`A4`, `A3`, `A2`, `18 × 24 in`, `24 × 36 in`) and screen (`Instagram post`, `Instagram story`, `YouTube`, `X post`, `4K`). Add your own from a plugin: `presets['Gallery 50x70cm'] = { width, height }`.
 
 The code is the source of truth: `config.size` if you set it, otherwise 1080 × 1080. Changing the size in the panel is for trying things out and lasts until you reload. Once you like a size, put it in `config.size`. Saved versions remember the size they were saved at.
 
