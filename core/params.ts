@@ -34,14 +34,12 @@ export type ControlFactory = (
   onChange: () => void,
 ) => Mounted;
 
-const isInt = (n: unknown) => Number.isInteger(n);
-
 /**
  * Whole-number bounds and value mean a whole-number slider: `{ value: 18, min: 3, max: 48 }`
  * without this hands the sketch 17.325. An explicit `step` always wins.
  */
 const impliedStep = (value: unknown, c: Control) =>
-  c.step ?? (isInt(value) && isInt(c.min) && isInt(c.max) ? 1 : (c.max! - c.min!) / 1000);
+  c.step ?? ([value, c.min, c.max].every(Number.isInteger) ? 1 : (c.max! - c.min!) / 1000);
 
 const slider: ControlFactory = (host, params, key, control, onChange) => {
   const step = impliedStep(params[key], control);

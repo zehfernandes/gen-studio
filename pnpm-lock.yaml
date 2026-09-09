@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       dialkit:
-        specifier: ^2.0.0
-        version: 2.0.0
+        specifier: ^2.0.1
+        version: 2.0.1
       p5:
         specifier: 2.3.2
         version: 2.3.2
@@ -216,8 +216,8 @@ packages:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
 
-  dialkit@2.0.0:
-    resolution: {integrity: sha512-22i7Vch9qdOhPhi1duFnfkR1DBG9h3cEHWC6NrelEwlsVyCHDeBKYz0MkLDqx2LREnmgONypKVVlwFqlJdGWVA==}
+  dialkit@2.0.1:
+    resolution: {integrity: sha512-Pr8hkyaWB8zk4hWrDh2Z30c0zCqGZ5o8IUOzdMVklLbwvV/6XoJB22xlTbnw2ulmckx/l2vhlZc7Dp1vYym0wg==}
     peerDependencies:
       motion: '>=11.0.0'
       motion-v: '>=2.0.0'
@@ -673,7 +673,7 @@ snapshots:
 
   detect-libc@2.1.2: {}
 
-  dialkit@2.0.0: {}
+  dialkit@2.0.1: {}
 
   es-module-lexer@2.3.2: {}
 

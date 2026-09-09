@@ -72,9 +72,8 @@ export class App {
   private async init() {
     try {
       this.sketches = await listSketches();
-      const hash = parseHash();
-      const name = hash.s || (this.sketches[0]?.name ?? 'example-canvas2d');
-      await this.loadSketch(name, hash.v);
+      const hash = new URLSearchParams(location.hash.slice(1));
+      await this.loadSketch(hash.get('s') || (this.sketches[0]?.name ?? 'example-canvas2d'), hash.get('v'));
     } catch (err) {
       console.error('[gen-studio] failed to initialize:', err);
       this.setStatus(`Failed to load sketches: ${err instanceof Error ? err.message : err}`);
@@ -358,13 +357,4 @@ function thumbnail(source: HTMLCanvasElement) {
   c.height = Math.round(source.height * scale);
   c.getContext('2d')!.drawImage(source, 0, 0, c.width, c.height);
   return c.toDataURL('image/png');
-}
-
-function parseHash() {
-  const hash = location.hash.slice(1);
-  const params = new URLSearchParams(hash);
-  return {
-    s: params.get('s'),
-    v: params.get('v'),
-  };
 }

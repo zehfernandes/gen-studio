@@ -33,7 +33,7 @@ export interface Control {
   step?: number;
   options?: string[];
   type?: string;
-  /** Folder to nest this param under inside Params. Params sharing a name share one folder. */
+  /** Plugin control types may read their own hints from the descriptor. */
   [hint: string]: unknown;
 }
 

@@ -4,7 +4,6 @@ import { outputPixels, matchPreset } from './size';
 import { timestamp, toLayers, layerFileName, isCanvas } from './files';
 import { loopT, frameCount } from './timing';
 
-export { frameCount };
 import type { ExporterFactory, FileLayer, LoadedSketch, Renderer } from './types';
 
 // Everything an export writes lands in sketches/<name>/exports/ (gitignored).

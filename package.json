@@ -24,7 +24,7 @@
     "verify": "pnpm check && pnpm test"
   },
   "dependencies": {
-    "dialkit": "^2.0.0",
+    "dialkit": "^2.0.1",
     "p5": "2.3.2"
   },
   "devDependencies": {
