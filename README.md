@@ -88,7 +88,7 @@ The JSON sidecar holds the params, seed and size needed to reproduce the file. V
 
 Anything that doesn't need to live in core goes in `plugins/` — an exporter, a renderer, a size preset, a param widget, a keybinding, an `/api` route.
 
-Recipes your coding agent can follow live in `.agents/skills/add-*`: GIF export, three.js, shaders, hot reload, tiled export, CLI export. Say "add GIF export" and it happens.
+Recipes your coding agent can follow live in `.agents/skills/add-*`: GIF export, three.js, shaders, hot reload, tiled export, CLI export, keyframe timeline. Say "add GIF export" and it happens.
 
 The contracts and internals are in [`AGENTS.md`](AGENTS.md). It's written for coding agents, but it doubles as the extension docs for humans.
 

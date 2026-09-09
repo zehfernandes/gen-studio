@@ -168,7 +168,7 @@ POST   /api/files/:path                       binary body → sketches/:path
 
 ## Skills (`.agents/skills/`)
 
-Available now: `add-three` (renderer), `add-shader` (WebGL2 fragment-shader renderer, no deps), `add-gif-export` (gifenc exporter + key `q`), `add-tiled-export` (prints beyond the GPU's canvas limit: tiles + ffmpeg stitch, no deps), `add-hot-reload` (params/size ride in the URL hash across Vite's full reload + Reset-to-defaults button/`Backspace`), `add-cli-export` (`pnpm export <sketch>` through headless Chromium; batch is a shell loop). Each SKILL.md is self-contained: rules, steps, the core contract it implements, pitfalls, a reference implementation that typechecks against current core, and how to verify.
+Available now: `add-three` (renderer), `add-shader` (WebGL2 fragment-shader renderer, no deps), `add-gif-export` (gifenc exporter + key `q`), `add-tiled-export` (prints beyond the GPU's canvas limit: tiles + ffmpeg stitch, no deps), `add-hot-reload` (params/size ride in the URL hash across Vite's full reload + Reset-to-defaults button/`Backspace`), `add-cli-export` (`pnpm export <sketch>` through headless Chromium; batch is a shell loop), `add-timeline` (dialkit's timeline dock; clips sampled from `api.time` per draw, never from a wall clock, so the export matches). Each SKILL.md is self-contained: rules, steps, the core contract it implements, pitfalls, a reference implementation that typechecks against current core, and how to verify.
 
 When writing a new one, keep that shape, keep it to `plugins/`, end with `pnpm check` + a manual check in the running app, and make appends to `plugins/index.ts` idempotent (check the import line exists before adding).
 
