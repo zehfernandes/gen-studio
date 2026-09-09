@@ -12,7 +12,7 @@ pnpm dev
 ## Principles
 
 - **A sketch is a folder.** `sketches/<name>/` holds the code, its versions and its exports. You can `ls` it, `cp -r` it, zip it, delete it. No project file, no database, no hidden state.
-- **Small enough to read.** `core/` is ~2.7k lines of plain TypeScript in one Vite process, on two dependencies: [p5](https://p5js.org) for the renderer and [dialkit](https://github.com/joshpuckett/dialkit) for the params panel. If something bothers you, open the file. 
+- **Small enough to understhand.** `core/` is ~2.7k lines of plain TypeScript in one Vite process. If something bothers you change it.
 - **Customization is a code change.** There is no settings panel. Want JPEG exports, a different filename scheme, a bleed guide? That's a small edit, and the codebase is small enough that editing it is safe.
 - **Skills over features.** GIF export, three.js, shaders and tiled prints are not in core. They live in `.agents/skills/add-*` — recipes your coding agent follows to drop one module into `plugins/`. Say "add GIF export" and it happens.
 
@@ -149,23 +149,6 @@ export function draw(p, t, api) {
 }
 ```
 
-Click, and `params.x/y` change, the stage redraws, the panel catches up when you release. Drag those sliders and the circle moves too. `E` exports the circle where you clicked; `S` saves it; a version brings it back.
-
-| The input writes to | Export shows it | In the sidecar | `S` saves it |
-|---|---|---|---|
-| `params` | yes | yes | yes |
-| a module variable | yes — same module | no | no |
-| a p5 built-in (`mouseX`, the `orbitControl()` camera) | yes — snapshotted at `E` | as `view` | no |
-
-The patterns follow from the rule:
-
-- Click to place things → `params.sites = [[x, y], …]`. An array is a fine param; the panel skips it, versions keep it.
-- Drag or wheel as a knob → a numeric param.
-- A live signal → sample it into a variable on screen, and replay a per-frame recording by `api.frame` for animations.
-- Anything that must stay out of the file → draw it under `if (!api.exporting)`.
-
-The export runs in a hidden instance nobody is touching, so your mouse cannot leak into a video.
-
 ## Params
 
 Every key in `params` becomes a control. The hints live next to the value:
@@ -195,7 +178,6 @@ Sizes are pixels. The **Size** folder has a preset dropdown plus `width`, `heigh
 
 - `width × height` are the design pixels your code draws in.
 - `resolution` multiplies the output. `2` gives a @2x file of the same picture; `0.5` a quick draft.
-- Presets cover print at 300 dpi (`A5`–`A1`, `Letter`, `Tabloid`, `18x24in`, `24x36in`) and social (`Instagram post/portrait/story`, `TikTok`, `YouTube`, `YouTube short`, `X post`, `4K`).
 
 The code is the source of truth: `config.size` if you set it, otherwise 1080 × 1080. Changing the size in the panel is for trying things out and lasts until you reload. Once you like a size, put it in `config.size`. Saved versions remember the size they were saved at.
 
