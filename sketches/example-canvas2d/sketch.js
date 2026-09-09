@@ -1,6 +1,5 @@
 export const config = {
   size: { preset: 'A4 300dpi' },
-  autoRender: false,
 };
 
 export const params = {
