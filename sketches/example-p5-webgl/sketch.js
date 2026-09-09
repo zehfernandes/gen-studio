@@ -7,9 +7,10 @@ export const config = {
 // mouse. `distance` is in api.width units: the same numbers frame the preview and the A3 file.
 export const params = {
   seed: 1,
-  yaw: { value: 0.6, min: -3.14, max: 3.14, step: 0.01 },
-  pitch: { value: -0.4, min: -1.5, max: 1.5, step: 0.01 },
-  distance: { value: 1.2, min: 0.2, max: 4, step: 0.01 },
+  // `group` puts a param in its own folder in the panel; ungrouped ones stay in Params.
+  yaw: { value: 0.6, min: -3.14, max: 3.14, step: 0.01, group: 'Camera' },
+  pitch: { value: -0.4, min: -1.5, max: 1.5, step: 0.01, group: 'Camera' },
+  distance: { value: 1.2, min: 0.2, max: 4, step: 0.01, group: 'Camera' },
   boxSize: { value: 0.16, min: 0.05, max: 0.5, step: 0.01 },
   color: '#2c62c8',
   bg: '#141628',

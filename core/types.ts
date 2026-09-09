@@ -33,6 +33,8 @@ export interface Control {
   step?: number;
   options?: string[];
   type?: string;
+  /** Folder this param sits in; ungrouped params share the panel's `Params` folder. */
+  group?: string;
   /** Plugin control types may read their own hints from the descriptor. */
   [hint: string]: unknown;
 }
