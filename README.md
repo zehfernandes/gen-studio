@@ -2,6 +2,8 @@
 
 A small, hackable environment for generative art. You write a `draw` function. You get a live preview, a params panel, saved versions, and pixel-exact exports to PNG, SVG or MP4.
 
+![gen-studio: sketch preview with the params panel and saved versions](docs/studio.png)
+
 ```bash
 pnpm install
 pnpm dev

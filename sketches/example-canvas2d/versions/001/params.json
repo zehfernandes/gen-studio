@@ -1,11 +1,15 @@
 {
   "params": {
-    "seed": 1,
-    "count": 18,
-    "amplitude": 0.08,
-    "frequency": 8,
-    "ink": "#1c1612",
-    "paper": "#f4f1e8"
+    "seed": 8,
+    "count": 7,
+    "spread": 0.24,
+    "grain": 24,
+    "paper": "#efeee8"
   },
-  "createdAt": "2026-09-02T19:29:51.904Z"
+  "size": {
+    "width": 2480,
+    "height": 3508,
+    "resolution": 1
+  },
+  "createdAt": "2026-09-09T04:16:38.197Z"
 }
