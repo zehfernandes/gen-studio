@@ -13,7 +13,7 @@ Then open the printed URL. There is no production build — the app *is* the dev
 
 **A sketch is a folder.** `sketches/<name>/` holds the code, its saved versions and its exports — everything that belongs to one piece, in one place you can `ls`, `cp -r`, zip or delete. There is no project file, no database, no hidden state.
 
-**Small enough to read, and yours.** `core/` is ~3k lines of plain TypeScript in one Vite process. If something bothers you, open the file — or ask your coding agent to walk you through it. Fork it, change it, `git pull` when upstream moves.
+**Small enough to read, and yours.** `core/` is ~2.7k lines of plain TypeScript in one Vite process. If something bothers you, open the file — or ask your coding agent to walk you through it. Fork it, change it, `git pull` when upstream moves.
 
 **Customization = code changes.** There is no settings panel. Want JPEG exports, a different filename scheme, a bleed guide? That's a small edit, and the codebase is small enough that changing it is safe.
 

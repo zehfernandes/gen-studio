@@ -14,7 +14,7 @@ This codebase is deliberately small so that the user — or you, on their behalf
 - **Filesystem only, no git.** The app never reads or writes git (no hashes, no commits). Versions store params; if the user wants to preserve code they duplicate the sketch folder. Don't reintroduce git integration.
 - **Protect determinism above all.** Same `seed` + same `frame` ⇒ same pixels, on screen and in the export. Never introduce `Date.now()`, `Math.random()`, or refresh-rate-dependent timing into the render path.
 - **Credible exit.** Keep the sketch contract plain (`draw(ctx, t, api)`, `params` a flat object). Do not wrap params in objects or require host imports inside sketches.
-- **Keep it readable.** `core/` is ~3k lines and should stay in that order of magnitude. Compact code, no speculative abstractions.
+- **Keep it readable.** `core/` is ~2.7k lines and should stay in that order of magnitude. Compact code, no speculative abstractions.
 
 ## Sketch module
 
