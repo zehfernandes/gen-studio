@@ -95,22 +95,6 @@ export function draw(p, t, { width: w, height: h }) {
 }
 ```
 
-The host owns the loop. p5 runs with `noLoop()` and the host calls `redraw()` once per frame, so `frameCount` and `millis()` never leak into your output. `api.random()` and `api.noise()` *are* p5's, seeded by the host, so use them freely. Draw with `api.width`/`api.height`, not `p.width`/`p.height` — those are canvas pixels.
-
-**Input works normally.** `mouseX`, `mouseIsPressed`, `touches`, `keyIsPressed`, `orbitControl()`, and the callbacks you assign in `setup` (`p.mousePressed = () => …`). The stage redraws whenever you interact with it.
-
-**The export shows what you see.** Press `E` and the host snapshots the p5 instance — the camera you orbited, the mouse position, which keys are down — then hands it to the hidden instance that renders the file. It lands in the sidecar as `view`. Two gotchas: `p.mouseX`/`p.mouseY` are canvas pixels, so divide by `api.scale`; and the app's shortcuts (`S`, `E`, `R`, `G`, `Space`, `Enter`, `Esc`, arrows) also reach your `keyPressed`.
-
-**Versions are different.** `S` saves `params`, not the instance. A view you want to come back to has to be a param. `sketches/example-p5-webgl` shows the round trip for `orbitControl()`: params set the camera, the mouse moves it, the sketch writes the result back to `params.yaw/pitch/distance`, and the sliders catch up when you release.
-
-**In WebGL** the default camera gets a fixed 60° field of view with the eye at `height / 2 / tan(30°)`, so perspective matches on screen and in the file. p5 2.x's own default widens the FOV with canvas height, which would make an A3 export look nothing like its preview. Roll your own camera and you set `perspective()` the same way — the example does.
-
-Three kinds of state no snapshot can carry:
-
-- **Pixels that pile up.** Trails without `background()`, framebuffer feedback, a simulation that steps in `draw`. The preview has thousands of redraws behind it; the export draws frame 0 once. Record what made them as data and replay it from `params` or an array indexed by `api.frame`.
-- **p5 DOM inputs.** `createSlider()`, `createButton()`, `createInput()` come back at their defaults in the export. Declare the value in `params` instead — that's what the panel is.
-- **Live devices.** `createCapture()`, p5.sound's mic. The export reopens the device and sees something else. Sample on screen into module data, and guard the device with `if (!api.exporting)`.
-
 ### Lifecycle and `api`
 
 ```js
@@ -136,15 +120,6 @@ Changing the size reruns `load` and `setup`. If `draw` throws, the error goes to
 `t` runs from 0 toward 1 across the loop and never reaches it, so the last frame is not a copy of the first and `sin(t * 2π)` wraps seamlessly.
 
 `api.random()` is reseeded with `seed` before **every** frame, so a layout drawn from it holds still while `t` animates. Want a fresh draw per frame? Call `api.randomSeed(api.seed + api.frame)` at the top of `draw`.
-
-**Autocomplete** needs no import — `core/gen-studio.d.ts` and `sketches/jsconfig.json` handle it. One JSDoc line is enough:
-
-```js
-/** @param {GenStudio.Canvas2D} c  @param {number} t  @param {GenStudio.Api} api */
-export function draw(c, t, api) { … }
-```
-
-Use `GenStudio.P5` for a p5 sketch. In a `.ts` sketch `import type { Api } from '../../core'` works too; type imports are erased, so the sketch keeps no runtime dependency on the host. `params` is untyped on purpose — the host flattens `{ value, min, max }` to a number at load, which a type checker can't see.
 
 ### Three rules for preview = export
 
@@ -241,52 +216,6 @@ poster.2026.09.02-14.30.05.007.json  ← params (incl. seed), size, pixels, pres
 The sidecar makes every export reproducible: same params, same seed, same size ⇒ same pixels.
 
 Video frames stream straight into `ffmpeg`, which needs to be on your PATH or at `FFMPEG_PATH`.
-
-### Big prints
-
-A browser canvas has a ceiling, and it is lower than you'd think. Chrome caps a WebGL canvas at ~33 MP — roughly A2 at 300 dpi — and a 150 MP print makes the GPU drop the canvas altogether. That used to come out as a valid, perfectly blank PNG. Now the export fails instead:
-
-```
-Canvas lost: 10630×14173 (151 MP) is over this GPU's limit.
-Lower size.resolution, or add the add-tiled-export skill.
-```
-
-Two ways out:
-
-- **Lower `resolution`.** A 90×120 cm print at 150 dpi is 38 MP and still sharp at arm's length.
-- **Apply the `add-tiled-export` skill.** The export then renders in 4096² tiles and `ffmpeg` stitches them, pixel-identical to a single pass, at any size.
-
-Sketches that follow the three rules need no change. A sketch with its own 3D camera, or one working in canvas pixels, reads `api.tile` — `sketches/example-p5-webgl` has the 8-line version.
-
-### Layers: returning files from `draw`
-
-If `draw` returns something, that is the artifact instead of the canvas:
-
-```js
-export function draw(c, t, api) {
-  const paths = makePaths(api);
-  strokePaths(c, paths);                                 // preview
-  if (api.exporting) return { data: toSVG(paths), extension: '.svg' };
-}
-```
-
-Return an array for several files under one base name — a canvas, a string, a `Blob` or an `ArrayBuffer` each:
-
-```js
-return [
-  c.canvas,                                                  // poster.<stamp>-0.png
-  { data: toSVG(paths), extension: '.svg' },                 // poster.<stamp>-1.svg
-  { data: JSON.stringify(paths), extension: '.json', suffix: '.paths' }, // poster.<stamp>.paths.json
-];
-```
-
-No format dropdown — the sketch decides. See `sketches/example-plotter`.
-
-## Keyboard
-
-`S` save · `E` export · `R` new seed · `Esc` cancel export · `Space` play/pause · `←` `→` step one frame · `G` toggle panel · `Enter` re-render
-
-The panel buttons show their key. All rebindable from a plugin.
 
 ## Extending
 
