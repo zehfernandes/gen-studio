@@ -1,6 +1,6 @@
 import { resolveSize, presets } from './size';
 import { renderers } from './renderers';
-import { splitParams } from './controls';
+import { sketchControls } from './controls';
 import { validate } from './validate';
 import type { LoadedSketch, Size, SketchConfig, SketchModule, SketchParams, VersionInfo } from './types';
 
@@ -30,7 +30,7 @@ export async function loadSketch(name: string): Promise<LoadedSketch> {
 
   const config: SketchConfig = mod.config || {};
   const params: SketchParams = mod.params || {};
-  const controls = splitParams(params);
+  const { controls, defaults } = sketchControls(mod, params);
 
   return {
     name,
@@ -38,7 +38,7 @@ export async function loadSketch(name: string): Promise<LoadedSketch> {
     module: mod,
     config,
     params,
-    defaults: Object.freeze(structuredClone(params)),
+    defaults,
     controls,
     // Code is the source: config.size, else the default. Panel changes last for the session (versions remember theirs).
     size: resolveSize(config.size),
