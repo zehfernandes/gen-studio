@@ -7,17 +7,12 @@ pnpm install
 pnpm dev
 ```
 
-Open the printed URL. There is no production build — the app *is* the dev server, and the routes that read and write `sketches/` are Vite middleware. Run it locally, where your files are.
-
 ## Principles
 
-**A sketch is a folder.** `sketches/<name>/` holds the code, its versions and its exports. You can `ls` it, `cp -r` it, zip it, delete it. No project file, no database, no hidden state.
-
-**Small enough to read.** `core/` is ~2.7k lines of plain TypeScript in one Vite process. If something bothers you, open the file. Fork it, change it, `git pull` when upstream moves.
-
-**Customization is a code change.** There is no settings panel. Want JPEG exports, a different filename scheme, a bleed guide? That's a small edit, and the codebase is small enough that editing it is safe.
-
-**Skills over features.** GIF export, three.js, shaders and tiled prints are not in core. They live in `.agents/skills/add-*` — recipes your coding agent follows to drop one module into `plugins/`. Say "add GIF export" and it happens.
+- **A sketch is a folder.** `sketches/<name>/` holds the code, its versions and its exports. You can `ls` it, `cp -r` it, zip it, delete it. No project file, no database, no hidden state.
+- **Small enough to read.** `core/` is ~2.7k lines of plain TypeScript in one Vite process. If something bothers you, open the file. Fork it, change it, `git pull` when upstream moves.
+- **Customization is a code change.** There is no settings panel. Want JPEG exports, a different filename scheme, a bleed guide? That's a small edit, and the codebase is small enough that editing it is safe.
+- **Skills over features.** GIF export, three.js, shaders and tiled prints are not in core. They live in `.agents/skills/add-*` — recipes your coding agent follows to drop one module into `plugins/`. Say "add GIF export" and it happens.
 
 ## The sketch folder
 
@@ -34,20 +29,7 @@ sketches/poster/
     └── poster.2026.09.02-14.30.05.007.json
 ```
 
-Put whatever the sketch needs beside it — fonts, images, data, helper modules — and reference it relative to the module:
-
-```js
-import { palette } from './palette.js';
-fetch(new URL('./data/points.json', import.meta.url));   // inside load()
-```
-
-If it's in the folder, it moves with the sketch.
-
-**To create one,** make a folder with a `sketch.js` and reload the browser. There is no "new sketch" button; your file manager already is one.
-
-**To branch, copy.** `cp -r sketches/poster sketches/poster-v2` takes the code and every version along. Do this before a code change that would make old versions meaningless — a version stores params only, so `poster/versions/003` stays exactly what you saved while `poster-v2` evolves. Twenty folders are fine. That's the whole model.
-
-The examples are ordinary folders. Copy one to start, or delete them all:
+## Examples 
 
 | | |
 |---|---|
