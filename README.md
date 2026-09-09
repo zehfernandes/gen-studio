@@ -10,7 +10,7 @@ pnpm dev
 ## Principles
 
 - **A sketch is a folder.** `sketches/<name>/` holds the code, its versions and its exports. You can `ls` it, `cp -r` it, zip it, delete it. No project file, no database, no hidden state.
-- **Small enough to read.** `core/` is ~2.7k lines of plain TypeScript in one Vite process. If something bothers you, open the file. Fork it, change it, `git pull` when upstream moves.
+- **Small enough to read.** `core/` is ~2.7k lines of plain TypeScript in one Vite process, on two dependencies: [p5](https://p5js.org) for the renderer and [dialkit](https://github.com/joshpuckett/dialkit) for the params panel. If something bothers you, open the file. Fork it, change it, `git pull` when upstream moves.
 - **Customization is a code change.** There is no settings panel. Want JPEG exports, a different filename scheme, a bleed guide? That's a small edit, and the codebase is small enough that editing it is safe.
 - **Skills over features.** GIF export, three.js, shaders and tiled prints are not in core. They live in `.agents/skills/add-*` — recipes your coding agent follows to drop one module into `plugins/`. Say "add GIF export" and it happens.
 
@@ -188,7 +188,7 @@ The host flattens the descriptors at load, so your code always reads `params.cou
 
 Too heavy to re-render on every edit? Set `config.autoRender = false`. Edits then wait for the **Render** button or `Enter`.
 
-A plugin can register new widget types, picked with `type:` in the hint. See [Extending](#extending).
+The panel is [dialkit](https://github.com/joshpuckett/dialkit). A plugin can wrap one of its controls, or render its own DOM, and select it with `type:` in the hint — see [Extending](#extending).
 
 ## Size
 
