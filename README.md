@@ -129,8 +129,6 @@ Changing the size reruns `load` and `setup`. If `draw` throws, the error goes to
 2. **Randomness from `api.random()` / `api.noise()`.** Not `Math.random()`.
 3. **Time from `t` / `api.frame`.** Not `Date.now()`, `millis()` or `frameCount`.
 
-Follow these and the file is the preview, pixel for pixel, at any size.
-
 ### Interaction
 
 The stage redraws whenever you touch it, so a sketch can react to the mouse, the keyboard, a MIDI knob or a microphone.
