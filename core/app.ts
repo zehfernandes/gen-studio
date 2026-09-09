@@ -56,15 +56,6 @@ export class App {
     this.paramsContainer.id = 'params';
     this.root.appendChild(this.paramsContainer);
 
-    // p5 binds its pointer events to `window` (any renderer may), so a wheel over the panels reached
-    // the sketch: scrolling the params list zoomed an `orbitControl()` camera. The panels swallow
-    // `wheel` on the way up, and still scroll natively. Only `wheel`: eating `pointerup` would leave
-    // p5 with the mouse stuck down when a canvas drag ends over a panel. (The panel's own sliders
-    // never listen for `wheel`, so scrolling past one cannot change its value.)
-    for (const panel of [this.sidebar.el, this.paramsContainer]) {
-      panel.addEventListener('wheel', (e) => e.stopPropagation());
-    }
-
     this.bindKeyboard();
     this.init();
   }
