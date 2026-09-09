@@ -1,5 +1,6 @@
 import p5 from 'p5';
 import { createRandomBackend } from './random';
+import { TYPING } from './hooks';
 import type { Renderer, RendererFactory, ApiBackend, DrawResult } from './types';
 
 // The stage sizes canvases in device pixels; show them at CSS size so retina previews are sharp, not huge.
@@ -166,19 +167,34 @@ const p5Factory: RendererFactory = ({
   const hostCamActive = (p: p5) => hostCam && (p as any)._renderer.states.curCamera === hostCam;
 
   const sketch = (p: p5) => {
-    // p5 binds these to `window` (p5 2.3), so anything the user touched anywhere on the page was the
-    // sketch's mouse: dragging a slider in the panel moved `mouseX` and fired `mousePressed`/
-    // `mouseDragged`. A gesture is the sketch's when it *starts* on the canvas — `mouseIsPressed`
-    // carries the rest of a drag that wanders off it (`orbitControl()`), so a canvas drag released
-    // over a panel still gets its `pointerup` and p5 is never left with the mouse stuck down.
-    // Wrapped here, inside the sketch closure: p5 binds them in `presetup`, right after this runs.
-    for (const type of ['pointerdown', 'pointerup', 'pointercancel', 'pointermove', 'dragend', 'dragover', 'click', 'dblclick', 'wheel']) {
-      const q = p as any;
-      const handler = q[`_on${type}`];
-      q[`_on${type}`] = (e: Event) => {
-        if (q.mouseIsPressed || e.target === q.canvas) handler.call(q, e);
-      };
-    }
+    // p5 binds its input handlers to `window` (p5 2.3), so anything the user touched anywhere on the
+    // page was the sketch's: dragging a slider in the panel moved `mouseX` and fired `mousePressed`/
+    // `mouseDragged`, and typing in a number field fired `keyPressed` per keystroke. Wrapped here,
+    // inside the sketch closure, because p5 binds them in `presetup`, right after this runs.
+    const q = p as any;
+    const guard = (types: string[], mine: (e: any) => boolean) => {
+      for (const type of types) {
+        const handler = q[`_on${type}`];
+        q[`_on${type}`] = (e: Event) => {
+          if (mine(e)) handler.call(q, e);
+        };
+      }
+    };
+
+    // A gesture is the sketch's when it *starts* on the canvas. `mouseIsPressed` carries the rest of
+    // a drag that wanders off it (`orbitControl()`), so a canvas drag released over a panel still
+    // gets its `pointerup` and p5 is never left with the mouse stuck down.
+    guard(
+      ['pointerdown', 'pointerup', 'pointercancel', 'pointermove', 'dragend', 'dragover', 'click', 'dblclick', 'wheel'],
+      (e) => q.mouseIsPressed || e.target === q.canvas,
+    );
+
+    // Keys can't start on the canvas — it takes no focus, so they arrive on `<body>`. The rule is the
+    // panel's instead: a key typed into a field or a control belongs to that widget (`TYPING`, the
+    // same test the app's own shortcuts use). `_downKeys` lets the release of a key pressed *before*
+    // the field took focus through, so p5 is not left holding it. `blur` stays unwrapped: p5 clears
+    // its held keys with it.
+    guard(['keydown', 'keyup', 'keypress'], (e) => !e.target?.closest?.(TYPING) || q._downKeys?.[e.key]);
 
     // p5 2.x awaits an async setup before the first draw.
     p.setup = async () => {

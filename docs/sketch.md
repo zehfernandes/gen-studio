@@ -122,7 +122,7 @@ The code is the source of truth: `config.size` if you set it, otherwise 1080 × 
 
 ## Interaction
 
-The stage redraws whenever you touch it, so a sketch can react to the mouse, the keyboard, a MIDI knob or a microphone. Only the canvas is yours: a gesture that starts on the panel — a slider drag — never reaches `mousePressed`, and one that starts on the canvas keeps reporting even if you drag off it.
+The stage redraws whenever you touch it, so a sketch can react to the mouse, the keyboard, a MIDI knob or a microphone. Only the canvas is yours: a gesture that starts on the panel — a slider drag — never reaches `mousePressed`, and one that starts on the canvas keeps reporting even if you drag off it. Same for the keyboard: typing in a panel field never reaches `keyPressed`.
 
 One rule makes that reach the file: **the export receives no input — it only re-runs `draw`.** So an input's job is to become data that `draw` reads. Use `params` for a decision you want to keep; a plain variable is enough for a hover.
 

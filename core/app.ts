@@ -4,7 +4,7 @@ import { buildParamsGUI, updateParamsGUI } from './params';
 import { Stage } from './stage';
 import { listSketches, loadSketch, listVersions, saveVersion, deleteVersion } from './sketch';
 import { exporters } from './export';
-import { hooks, keys } from './hooks';
+import { hooks, keys, TYPING } from './hooks';
 import { resolveSize } from './size';
 import type { Panel } from './params';
 import type { LoadedSketch, Size } from './types';
@@ -332,7 +332,7 @@ export class App {
 
     window.addEventListener('keydown', (e) => {
       const target = e.target as HTMLElement;
-      if (target.closest('input, textarea, select, button, [contenteditable], .dialkit-root') || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (target.closest(TYPING) || e.metaKey || e.ctrlKey || e.altKey) return;
       const action = keys[e.key.length === 1 ? e.key.toLowerCase() : e.key];
       if (!action) return;
       e.preventDefault();

@@ -25,6 +25,13 @@ export const keys: Record<string, (app: App) => void> = {
 };
 
 /**
+ * A key event whose target matches this is the panel's, not the sketch's: the user is typing in a
+ * field or working a control. Used by the app's shortcuts and by the p5 renderer, which would
+ * otherwise hear every keystroke — p5 binds `keydown`/`keyup` to `window`.
+ */
+export const TYPING = 'input, textarea, select, button, [contenteditable], .dialkit-root';
+
+/**
  * The key bound to an action, for button labels: `keyFor('app.export()')` → `'E'`. Matches the handler's
  * source text (whitespace ignored), so a plugin that rebinds `keys.e` and binds `keys.x` to export is reflected.
  */
