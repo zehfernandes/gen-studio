@@ -22,7 +22,7 @@ sketches/poster/
 
 No project file, no database, no hidden state. You can `ls` it, `cp -r` it, zip it, delete it.
 
-The core is intentionally small — plain TypeScript in one Vite process, on two dependencies: [p5](https://p5js.org) for the renderer and [dialkit](https://github.com/joshpuckett/dialkit) for the panel. Want different export formats, renderers, controls or workflows? Change the code or add a plugin, instead of configuring a large framework.
+The core is intentionally small — plain TypeScript in one Vite process. Want different export formats, renderers, controls or workflows? Change the code or add a plugin, instead of configuring a large framework.
 
 ## Write a sketch
 
