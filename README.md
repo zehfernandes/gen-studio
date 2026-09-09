@@ -114,7 +114,6 @@ export function dispose(p, api)    { /* free listeners, GL resources */ }
 | `frame`, `frames`, `fps`, `time` | where you are in the loop (`time` is `frame / fps`) |
 | `width`, `height` | design pixels |
 | `scale` | device px per design px; the host already applied it |
-| `tile` | the window of the artwork this canvas shows ([Big prints](#big-prints)) |
 | `exporting` | true while rendering to a file — hide guides with it |
 
 Changing the size reruns `load` and `setup`. If `draw` throws, the error goes to the status bar and the loop keeps running. So does a syntax error or a missing `draw`.
