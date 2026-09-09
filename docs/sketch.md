@@ -96,8 +96,11 @@ export const params = {
   mode:  { value: 'top', options: ['top', 'bottom'] },  // dropdown
   ink:   '#1c1612',                                     // color picker
   guide: true,                                          // checkbox
+  angle: { value: 0.6, min: -3.14, max: 3.14, group: 'Camera' }, // its own folder
 };
 ```
+
+`group` sorts a long panel: params that name one get a folder of that name, the rest stay in **Params**.
 
 The host flattens the descriptors at load, so your code always reads `params.count` as a plain value. Dragging a slider writes into `params` and re-renders.
 
@@ -119,7 +122,7 @@ The code is the source of truth: `config.size` if you set it, otherwise 1080 × 
 
 ## Interaction
 
-The stage redraws whenever you touch it, so a sketch can react to the mouse, the keyboard, a MIDI knob or a microphone.
+The stage redraws whenever you touch it, so a sketch can react to the mouse, the keyboard, a MIDI knob or a microphone. Only the canvas is yours: a gesture that starts on the panel — a slider drag — never reaches `mousePressed`, and one that starts on the canvas keeps reporting even if you drag off it.
 
 One rule makes that reach the file: **the export receives no input — it only re-runs `draw`.** So an input's job is to become data that `draw` reads. Use `params` for a decision you want to keep; a plain variable is enough for a hover.
 

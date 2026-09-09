@@ -166,6 +166,20 @@ const p5Factory: RendererFactory = ({
   const hostCamActive = (p: p5) => hostCam && (p as any)._renderer.states.curCamera === hostCam;
 
   const sketch = (p: p5) => {
+    // p5 binds these to `window` (p5 2.3), so anything the user touched anywhere on the page was the
+    // sketch's mouse: dragging a slider in the panel moved `mouseX` and fired `mousePressed`/
+    // `mouseDragged`. A gesture is the sketch's when it *starts* on the canvas — `mouseIsPressed`
+    // carries the rest of a drag that wanders off it (`orbitControl()`), so a canvas drag released
+    // over a panel still gets its `pointerup` and p5 is never left with the mouse stuck down.
+    // Wrapped here, inside the sketch closure: p5 binds them in `presetup`, right after this runs.
+    for (const type of ['pointerdown', 'pointerup', 'pointercancel', 'pointermove', 'dragend', 'dragover', 'click', 'dblclick', 'wheel']) {
+      const q = p as any;
+      const handler = q[`_on${type}`];
+      q[`_on${type}`] = (e: Event) => {
+        if (q.mouseIsPressed || e.target === q.canvas) handler.call(q, e);
+      };
+    }
+
     // p5 2.x awaits an async setup before the first draw.
     p.setup = async () => {
       const mode = isWebgl ? 'webgl' : 'p2d';

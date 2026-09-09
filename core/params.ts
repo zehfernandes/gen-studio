@@ -275,9 +275,20 @@ export function buildParamsGUI(
     return folder.body;
   };
 
+  const renderBody = addFolder('Render');
+
+  // `group: 'Shape'` in a descriptor gives that param its own folder. Built before Size (folders land
+  // in call order), in the order the params declare them, so the panel reads Render / groups / Size.
+  const groups = new Map<string, HTMLElement>();
+  const paramsBody = addFolder('Params');
+  for (const key of Object.keys(params)) {
+    const name = controls[key]?.group;
+    if (name && !groups.has(name)) groups.set(name, addFolder(name));
+  }
+
   const panel: Panel = {
     element,
-    folders: { render: addFolder('Render'), params: addFolder('Params'), size: addFolder('Size') },
+    folders: { render: renderBody, params: paramsBody, size: addFolder('Size') },
     addFolder,
     update: () => widgets.forEach((w) => w.update()),
     destroy() {
@@ -313,9 +324,14 @@ export function buildParamsGUI(
     // `oklch(...)`, and that must still build a color picker.
     const type = control.type ?? inferType(defaults[key] ?? params[key], control);
     const factory = type && controlTypes[type];
-    if (factory) widgets.push(factory(panel.folders.params, params, key, control, edited));
+    const host = (control.group && groups.get(control.group)) || paramsBody;
+    if (factory) widgets.push(factory(host, params, key, control, edited));
     else if (type) console.warn(`[gen-studio] param "${key}": unknown control type "${type}"`);
   }
+
+  // A sketch that groups every param would leave an empty "Params" header. Hidden, not removed, so
+  // `folders.params` stays mountable — a plugin that puts a control there clears `hidden` itself.
+  if (!paramsBody.childElementCount) (paramsBody.closest('.dialkit-folder') as HTMLElement | null)?.toggleAttribute('hidden', true);
 
   widgets.push(...sizeControls(panel.folders.size, size, actions.size));
 
