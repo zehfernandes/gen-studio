@@ -12,7 +12,7 @@ pnpm dev
 ## Principles
 
 - **A sketch is a folder.** `sketches/<name>/` holds the code, its versions and its exports. You can `ls` it, `cp -r` it, zip it, delete it. No project file, no database, no hidden state.
-- **Small enough to read.** `core/` is ~2.7k lines of plain TypeScript in one Vite process, on two dependencies: [p5](https://p5js.org) for the renderer and [dialkit](https://github.com/joshpuckett/dialkit) for the params panel. If something bothers you, open the file. Fork it, change it, `git pull` when upstream moves.
+- **Small enough to read.** `core/` is ~2.7k lines of plain TypeScript in one Vite process, on two dependencies: [p5](https://p5js.org) for the renderer and [dialkit](https://github.com/joshpuckett/dialkit) for the params panel. If something bothers you, open the file. 
 - **Customization is a code change.** There is no settings panel. Want JPEG exports, a different filename scheme, a bleed guide? That's a small edit, and the codebase is small enough that editing it is safe.
 - **Skills over features.** GIF export, three.js, shaders and tiled prints are not in core. They live in `.agents/skills/add-*` — recipes your coding agent follows to drop one module into `plugins/`. Say "add GIF export" and it happens.
 
