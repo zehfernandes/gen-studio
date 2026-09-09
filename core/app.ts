@@ -6,7 +6,7 @@ import { listSketches, loadSketch, listVersions, saveVersion, deleteVersion } fr
 import { exporters } from './export';
 import { hooks, keys } from './hooks';
 import { resolveSize } from './size';
-import type GUI from 'lil-gui';
+import type { Panel } from './params';
 import type { LoadedSketch, Size } from './types';
 
 const THUMB_WIDTH = 320;
@@ -21,7 +21,7 @@ export class App {
 
   sketch?: LoadedSketch;
   sketches: { name: string; entry: string }[] = [];
-  gui?: GUI;
+  gui?: Panel;
   abortExport?: AbortController;
 
   private sketchLoadId = 0;
@@ -58,9 +58,9 @@ export class App {
 
     // p5 binds its pointer events to `window` (any renderer may), so a wheel over the panels reached
     // the sketch: scrolling the params list zoomed an `orbitControl()` camera. The panels swallow
-    // `wheel` on the way up — lil-gui's own slider handlers already ran, and the panel still scrolls
-    // natively. Only `wheel`: eating `pointerup` would leave p5 with the mouse stuck down when a
-    // canvas drag ends over a panel.
+    // `wheel` on the way up, and still scroll natively. Only `wheel`: eating `pointerup` would leave
+    // p5 with the mouse stuck down when a canvas drag ends over a panel. (The panel's own sliders
+    // never listen for `wheel`, so scrolling past one cannot change its value.)
     for (const panel of [this.sidebar.el, this.paramsContainer]) {
       panel.addEventListener('wheel', (e) => e.stopPropagation());
     }
@@ -156,6 +156,8 @@ export class App {
   private buildParamsGUI() {
     const sketch = this.sketch;
     if (!sketch) return;
+    // dialkit controls hold listeners; drop the old panel before its container is emptied.
+    this.gui?.destroy();
     const hasAnim = !!(sketch.config.fps && sketch.config.duration);
     const auto = this.autoRender();
     const gui = buildParamsGUI(this.paramsContainer, sketch, auto ? () => this.stage.renderOnce() : () => {}, {
@@ -331,7 +333,7 @@ export class App {
 
     window.addEventListener('keydown', (e) => {
       const target = e.target as HTMLElement;
-      if (target.closest('input, textarea, select, button, [contenteditable], .lil-gui') || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (target.closest('input, textarea, select, button, [contenteditable], .dialkit-root') || e.metaKey || e.ctrlKey || e.altKey) return;
       const action = keys[e.key.length === 1 ? e.key.toLowerCase() : e.key];
       if (!action) return;
       e.preventDefault();

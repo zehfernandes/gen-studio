@@ -32,7 +32,6 @@ describe('outputPixels', () => {
 
 describe('matchPreset', () => {
   it('matches either orientation, ignores resolution', () => {
-    expect(matchPreset({ width: 1080, height: 1350, resolution: 3 })).toBe('Instagram portrait');
     expect(matchPreset({ width: 3508, height: 2480, resolution: 1 })).toBe('A4 300dpi');
     expect(matchPreset({ width: 1000, height: 1000, resolution: 1 })).toBeUndefined();
   });

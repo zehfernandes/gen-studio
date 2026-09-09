@@ -49,7 +49,7 @@ export class Stage {
 
   private onInput(e: Event) {
     if (!this.renderer || !this.sketch || !this.acceptInput) return;
-    if ((e.target as HTMLElement | null)?.closest?.('input, textarea, .lil-gui')) return;
+    if ((e.target as HTMLElement | null)?.closest?.('input, textarea, .dialkit-root')) return;
     // `autoRender: false` means "only on Render/Enter", for input as well as for slider edits.
     if (this.sketch.config.autoRender === false) return;
     // Keep drawing a little past the last event: p5's orbitControl eases out over frames, and a

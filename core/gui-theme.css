@@ -1,4 +1,4 @@
-/* gen-studio layout + lil-gui theme */
+/* gen-studio layout + params panel theme */
 
 :root {
   --bg: #101010;
@@ -82,88 +82,13 @@ html, body {
 /* sidebar chrome */
 
 #sidebar-head {
-  display: flex;
-  gap: 8px;
   margin-bottom: 16px;
 }
 
-#sketch-select {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
-  height: 34px;
-  padding: 0 28px 0 10px;
-  appearance: none;
-  -webkit-appearance: none;
-  background: #202020 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23ffffff' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 10px center;
-  color: #ffffff;
-  border: none;
-  border-radius: 10px;
-  font: 11px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
-  text-align: left;
-  cursor: pointer;
-}
+/* The sketch picker is the same dialkit select as the panel's; `#sidebar-head` is its `.dialkit-root`. */
 
-#sketch-select selectedcontent {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-#sketch-select:focus {
-  outline: none;
-  background-color: #282828;
-}
-
-/* Customizable select (Chrome 135+): style the popup like the panel rows. Other browsers keep the native menu. */
-
-#sketch-select,
-#sketch-select::picker(select) {
-  appearance: base-select;
-}
-
-#sketch-select::picker-icon {
-  display: none;
-}
-
-#sketch-select:open {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 5l4-4 4 4' fill='none' stroke='%23ffffff' stroke-width='1.5'/%3E%3C/svg%3E");
-}
-
-#sketch-select::picker(select) {
-  margin-top: 4px;
-  padding: 4px;
-  background: #202020;
-  border: none;
-  border-radius: 10px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
-  font: inherit;
-}
-
-#sketch-select option {
-  height: 34px;
-  padding: 0 10px;
-  font: inherit;
-  line-height: 34px;
-  border-radius: 8px;
-  color: #ffffff;
-}
-
-#sketch-select option:hover,
-#sketch-select option:focus-visible {
-  background: #282828;
-  outline: none;
-}
-
-#sketch-select option:checked {
-  background: #303030;
-}
-
-#sketch-select option::checkmark {
-  display: none;
+#sidebar-head .dialkit-select-value {
+  max-width: 170px;
 }
 
 .versions-empty {
@@ -223,219 +148,82 @@ html, body {
   color: #ff6b6b;
 }
 
-/* lil-gui theme
-   lil-gui re-declares its custom properties on every .lil-gui element (folders included), so a
-   theme must target nested folders too or the values never reach the controllers. */
+/* params panel
+   The panel is dialkit's own DOM (core/params.ts mounts its controls into a bare `.dialkit-root`),
+   so dialkit/vanilla/styles.css does the widget styling and this block only fits it to the app. */
 
-.gen-studio.lil-gui,
-.gen-studio .lil-gui {
-  --row: 34px;
-  --value: #ffffff;
-  --pill: #111111;
-
-  --width: 100%;
-  --background-color: transparent;
-  --text-color: #757575;
-  --widget-color: #202020;
-  --hover-color: #282828;
-  --focus-color: #323232;
-  --number-color: var(--value);
-  --string-color: var(--value);
-  --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
-  --widget-border-radius: 10px;
-  --widget-padding: 0;
-  --name-width: auto;
-  --folder-indent: 0px;
-  --slider-input-width: 45px;
-  --color-input-width: 52px;
-  --checkbox-size: calc(var(--row) - 10px);
+#params .dialkit-root {
+  padding: 12px 12px 24px;
 }
 
-.gen-studio.lil-root {
-  padding: 8px 4px 6px;
+/* dialkit asks for 'Geist Mono' but ships no font; use the status bar's mono so numbers match. */
+.dialkit-root :where(.dialkit-slider-value, .dialkit-slider-input, .dialkit-color-value, .dialkit-color-css-input, .dialkit-pad-value, .gen-number-input) {
+  font-family: "Berkeley Mono", "Berkeley Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
 }
 
-.gen-studio.lil-root > .lil-title {
-  display: none;
+/* Free numeric field (`core/params.ts#numberField`): a dialkit row whose value is always editable.
+   Same metrics as `.dialkit-labeled-control`, same value type as `.dialkit-slider-value`. */
+
+.dialkit-root .gen-number {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: var(--dial-row-height);
+  padding: 2px 12px;
+  background: var(--dial-surface);
+  border-radius: var(--dial-radius);
+  transition: background 0.15s;
 }
 
-.gen-studio .lil-gui > .lil-title,
-.gen-studio.lil-root > .lil-children > .lil-gui > .lil-title {
-  height: auto;
-  line-height: 1.2;
-  padding: 4px 8px;
-  border: none;
-  font-weight: 500;
-  color: #8f8f8f;
+.dialkit-root .gen-number:hover,
+.dialkit-root .gen-number:focus-within {
+  background: var(--dial-surface-hover);
 }
 
-/* rows: every widget is a full-width pill with the name inside it */
-
-.gen-studio .lil-controller {
-  padding: 2px 0;
-}
-
-.gen-studio .lil-controller > .lil-name {
-  padding-left: 10px;
-}
-
-.gen-studio .lil-controller .lil-widget {
-  justify-content: flex-end;
-  min-width: 0;
-}
-
-.gen-studio .lil-controller.lil-number,
-.gen-studio .lil-controller.lil-option,
-.gen-studio .lil-controller.lil-boolean,
-.gen-studio .lil-controller.lil-color,
-.gen-studio .lil-controller.lil-string {
-  border-radius: var(--widget-border-radius);
-  background: var(--widget-color);
-  min-height: var(--row);
-}
-
-.gen-studio .lil-controller.lil-number:not(.lil-has-slider) .lil-widget,
-.gen-studio .lil-controller.lil-option .lil-widget {
-  padding-right: 6px;
-}
-
-.gen-studio .lil-controller.lil-string input {
-  padding-right: 10px;
-  text-align: right;
-}
-
-/* slider: the track fills the row, name and value float on top of it */
-
-.gen-studio .lil-controller.lil-number.lil-has-slider {
-  position: relative;
-  overflow: hidden;
-}
-
-.gen-studio .lil-controller.lil-number.lil-has-slider > .lil-name {
-  position: relative;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.gen-studio .lil-controller.lil-number.lil-has-slider .lil-widget {
-  position: absolute;
-  inset: 0;
-}
-
-.gen-studio .lil-controller.lil-number.lil-has-slider .lil-slider {
-  height: 100%;
-  padding-right: 0;
-  border-radius: 0;
-  background: transparent;
-}
-
-.gen-studio .lil-controller.lil-number.lil-has-slider .lil-fill {
-  background: #303030;
-  opacity: 1;
-}
-
-.gen-studio .lil-controller.lil-number.lil-has-slider input {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  z-index: 2;
-  margin: 0;
-  transform: translateY(-50%);
-  text-align: right;
-  background: transparent;
-}
-
-/* plain numbers and color hex: a darker pill inside the row */
-
-.gen-studio .lil-controller.lil-number:not(.lil-has-slider) input,
-.gen-studio .lil-controller.lil-color input[type="text"] {
-  margin: 0;
-  background: var(--pill);
-  color: var(--value);
-}
-
-.gen-studio .lil-controller.lil-number:not(.lil-has-slider) input {
-  width: var(--slider-input-width);
-  text-align: right;
-}
-
-.gen-studio .lil-controller.lil-color input[type="text"] {
-  text-align: center;
-}
-
-/* dropdown */
-
-.gen-studio .lil-controller.lil-option .lil-display {
-  flex: 1;
-  min-width: 0;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  padding-right: 6px;
-  text-align: right;
-  color: var(--value);
-  background: transparent;
-}
-
-.gen-studio .lil-controller.lil-option .lil-display::after {
-  display: none;
-}
-
-/* boolean: a square that fills when checked */
-
-.gen-studio .lil-controller.lil-boolean > .lil-name {
-  flex: 1;
-}
-
-.gen-studio .lil-controller.lil-boolean .lil-widget {
-  width: auto;
-  padding-right: 10px;
-}
-
-.gen-studio .lil-controller.lil-boolean input[type="checkbox"] {
-  position: relative;
-  background: transparent;
-  box-shadow: none;
-}
-
-.gen-studio .lil-controller.lil-boolean input[type="checkbox"]:checked::before {
-  content: "";
-  position: absolute;
-  inset: 4px;
-  background: var(--value);
-  border-radius: 3px;
-}
-
-/* color swatch */
-
-.gen-studio .lil-controller.lil-color .lil-widget {
-  gap: 6px;
-  padding-right: 8px;
-}
-
-.gen-studio .lil-controller.lil-color .lil-display {
-  width: 22px;
-  height: 22px;
+.dialkit-root .gen-number-label {
   flex-shrink: 0;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.85);
-}
-
-/* buttons */
-
-.gen-studio .lil-controller.lil-function {
-  padding: 0;
-}
-
-.gen-studio .lil-controller.lil-function + .lil-controller.lil-function {
-  margin-top: 2px;
-}
-
-.gen-studio .lil-controller button {
-  min-height: var(--row);
   font-size: 13px;
+  font-weight: 500;
+  color: var(--dial-text-label);
 }
 
-.gen-studio .lil-controller button:hover,
-.gen-studio .lil-controller button:active {
-  color: var(--value);
+.dialkit-root .gen-number-input {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0 0 1px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dial-text-label);
+  text-align: right;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  outline: none;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+/* The underline is the affordance, exactly as on a slider's value. */
+.dialkit-root .gen-number:hover .gen-number-input {
+  border-bottom-color: var(--dial-border-hover);
+}
+
+.dialkit-root .gen-number-input:focus {
+  color: var(--dial-text-focus);
+  border-bottom-color: var(--dial-focus-ring);
+}
+
+.dialkit-root .gen-number-input::selection {
+  background: var(--dial-surface-active);
+}
+
+/* Sections are dividers between groups, not a boxed list: drop the outer two rules. */
+#params .dialkit-folder:first-child {
+  border-top: none;
+}
+
+#params .dialkit-folder:last-child {
+  border-bottom: none;
 }

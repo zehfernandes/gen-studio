@@ -1,3 +1,4 @@
+import { mountSelectControl } from 'dialkit/vanilla';
 import type { VersionInfo } from './types';
 
 export interface SidebarActions {
@@ -8,9 +9,11 @@ export interface SidebarActions {
 
 export class Sidebar {
   el: HTMLElement;
-  sketchSelect: HTMLSelectElement;
   versionsEl: HTMLElement;
   private actions: SidebarActions;
+  private sketchSelect: { update(props: ReturnType<Sidebar['selectProps']>): void; destroy(): void };
+  private names: string[] = [];
+  private current = '';
 
   constructor(parent: HTMLElement, actions: SidebarActions) {
     this.actions = actions;
@@ -18,29 +21,39 @@ export class Sidebar {
     this.el.id = 'sidebar';
     parent.appendChild(this.el);
 
+    // The picker is the panel's select, so the head is its `.dialkit-root`: that is where the
+    // theme's custom properties are declared, and the control is unstyled without them.
     const head = document.createElement('div');
     head.id = 'sidebar-head';
+    head.className = 'dialkit-root';
+    head.dataset.theme = 'dark';
     this.el.appendChild(head);
-
-    this.sketchSelect = document.createElement('select');
-    this.sketchSelect.id = 'sketch-select';
-    this.sketchSelect.addEventListener('change', () => actions.onSelect(this.sketchSelect.value));
-    head.appendChild(this.sketchSelect);
+    this.sketchSelect = mountSelectControl(head, this.selectProps());
 
     this.versionsEl = document.createElement('div');
     this.versionsEl.id = 'versions';
     this.el.appendChild(this.versionsEl);
   }
 
+  private selectProps() {
+    return {
+      label: 'sketch',
+      value: this.current,
+      // `{ value, label }`, not bare strings: dialkit title-cases a string option, and a sketch
+      // name is a folder name — `example-canvas2d` must not render as `Example-Canvas2d`.
+      options: this.names.map((name) => ({ value: name, label: name })),
+      onChange: (name: string) => {
+        this.current = name;
+        this.sketchSelect.update(this.selectProps()); // controlled widget
+        this.actions.onSelect(name);
+      },
+    };
+  }
+
   setSketches(sketches: { name: string; entry: string }[], current: string) {
-    this.sketchSelect.innerHTML = '';
-    for (const s of sketches) {
-      const opt = document.createElement('option');
-      opt.value = s.name;
-      opt.textContent = s.name;
-      if (s.name === current) opt.selected = true;
-      this.sketchSelect.appendChild(opt);
-    }
+    this.names = sketches.map((s) => s.name);
+    this.current = current;
+    this.sketchSelect.update(this.selectProps());
   }
 
   setVersions(versions: VersionInfo[], currentId: string | null, name: string) {

@@ -10,9 +10,11 @@
 // exporters.gif = gifExporter;
 // keys.q = (app) => app.export('gif');
 //
-// hooks.panel.push((gui, sketch, app) => gui.addFolder('Batch').add({ run: () => app.export('batch') }, 'run'));
+// import { mountButtonGroup } from 'dialkit/vanilla';
+// hooks.panel.push((panel, sketch, app) =>
+//   mountButtonGroup(panel.addFolder('Batch'), { buttons: [{ label: 'Run', onClick: () => app.export('batch') }] }));
 //
-// controlTypes.wheel = (folder, params, key, control, onChange) => { /* custom lil-gui widget */ };
+// controlTypes.wheel = (host, params, key, control, onChange) => { /* mount your own widget; return { update, destroy } */ };
 //
 // Sizes are pixels. A physical size is just a preset you compute once:
 // const mm = (w: number, h: number, dpi = 300) => ({ width: Math.round((w / 25.4) * dpi), height: Math.round((h / 25.4) * dpi) });

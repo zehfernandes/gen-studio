@@ -6,9 +6,13 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": [
         "run",
-        "dev"
+        "dev",
+        "--",
+        "--port",
+        "5180",
+        "--strictPort"
       ],
-      "port": 5173
+      "port": 5180
     }
   ]
 }

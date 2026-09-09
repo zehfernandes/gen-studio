@@ -3,7 +3,15 @@
   "version": "0.1.0",
   "description": "A small, hackable environment for generative art",
   "license": "MIT",
-  "author": "",
+  "author": "Zeh Fernandes <ozehfernandes@gmail.com>",
+  "keywords": [
+    "generative-art",
+    "creative-coding",
+    "canvas",
+    "p5",
+    "plotter",
+    "vite"
+  ],
   "type": "module",
   "packageManager": "pnpm@11.22.0",
   "engines": {
@@ -16,7 +24,7 @@
     "verify": "pnpm check && pnpm test"
   },
   "dependencies": {
-    "lil-gui": "^0.21.0",
+    "dialkit": "^2.0.0",
     "p5": "2.3.2"
   },
   "devDependencies": {

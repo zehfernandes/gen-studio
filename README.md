@@ -13,11 +13,11 @@ Then open the printed URL. There is no production build — the app *is* the dev
 
 **A sketch is a folder.** `sketches/<name>/` holds the code, its saved versions and its exports — everything that belongs to one piece, in one place you can `ls`, `cp -r`, zip or delete. There is no project file, no database, no hidden state.
 
-**Small enough to read, and yours.** `core/` is ~2k lines of plain TypeScript in one Vite process. If something bothers you, open the file — or ask your coding agent to walk you through it. Fork it, change it, `git pull` when upstream moves.
+**Small enough to read, and yours.** `core/` is ~3k lines of plain TypeScript in one Vite process. If something bothers you, open the file — or ask your coding agent to walk you through it. Fork it, change it, `git pull` when upstream moves.
 
 **Customization = code changes.** There is no settings panel. Want JPEG exports, a different filename scheme, a bleed guide? That's a small edit, and the codebase is small enough that changing it is safe.
 
-**Skills over features.** GIF export, three.js, a shader renderer, a curve widget are not in core — they live in `.agents/skills/add-*`, recipes your coding agent follows to add one module to `plugins/`, in a file you can read and delete. Say "add GIF export" and it happens.
+**Skills over features.** GIF export, three.js, a shader renderer, tiled prints are not in core — they live in `.agents/skills/add-*`, recipes your coding agent follows to add one module to `plugins/`, in a file you can read and delete. Say "add GIF export" and it happens.
 
 ## The sketch folder
 
@@ -194,7 +194,7 @@ export const params = {
 };
 ```
 
-Add `group: 'Ink'` to a descriptor to nest it in a folder inside **Params** (`sketches/topography` does). On load the host flattens the descriptors, so your code always reads `params.count` as a plain value. Dragging a slider writes into `params` and re-renders. `seed` is special only in that `R` gives it a new random value — the fastest way to see another one. If the sketch is too heavy for that, set `config.autoRender = false`: edits then wait until you press the **Render** button at the top of the panel (or `Enter`). Plugins can register new widget types selected with `type:` in the hint — the extension contracts live in `AGENTS.md`.
+On load the host flattens the descriptors, so your code always reads `params.count` as a plain value. Dragging a slider writes into `params` and re-renders. `seed` is special only in that `R` gives it a new random value — the fastest way to see another one. If the sketch is too heavy for that, set `config.autoRender = false`: edits then wait until you press the **Render** button at the top of the panel (or `Enter`). Plugins can register new widget types selected with `type:` in the hint — the extension contracts live in `AGENTS.md`.
 
 ## Size
 
@@ -258,7 +258,7 @@ No format dropdown — the sketch decides. See `sketches/example-plotter`.
 
 ## Extending
 
-There is no plugin store and no settings panel. To extend the app — a new exporter, renderer, size preset, param widget, keybinding, `/api` route — you (or your coding agent) write a small module in `plugins/`. Common ones ship as ready-made skills in `.agents/skills/add-*` (`add-gif-export`, `add-three`, `add-shader`, `add-curve-control`, `add-hot-reload`, `add-tiled-export`, `add-cli-export`).
+There is no plugin store and no settings panel. To extend the app — a new exporter, renderer, size preset, param widget, keybinding, `/api` route — you (or your coding agent) write a small module in `plugins/`. Common ones ship as ready-made skills in `.agents/skills/add-*` (`add-gif-export`, `add-three`, `add-shader`, `add-hot-reload`, `add-tiled-export`, `add-cli-export`).
 
 The contracts, registries and examples live in [`AGENTS.md`](AGENTS.md) — it's written for coding agents, but it doubles as the extension documentation for humans.
 

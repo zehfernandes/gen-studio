@@ -10,7 +10,7 @@ export { timestamp, toLayers, layerFileName, isCanvas } from './files';
 export { frameAt, loopT } from './timing';
 export { validate } from './validate';
 export type { App } from './app';
-export type { ControlFactory } from './params';
+export type { ControlFactory, Mounted, Panel } from './params';
 export type {
   Api,
   ApiBackend,

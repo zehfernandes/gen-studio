@@ -34,7 +34,6 @@ export interface Control {
   options?: string[];
   type?: string;
   /** Folder to nest this param under inside Params. Params sharing a name share one folder. */
-  group?: string;
   [hint: string]: unknown;
 }
 

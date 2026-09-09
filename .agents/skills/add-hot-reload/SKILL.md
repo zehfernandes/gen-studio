@@ -14,7 +14,7 @@ It deliberately keeps the full page reload. Swapping the module in place would s
 - Write to `plugins/` only. Never edit `core/`.
 - Restore is a merge: only keys that still exist in the new `params` are written, so a renamed or removed param falls back to the code's default instead of resurrecting stale state.
 - The hash is the store — not `sessionStorage`, not `localStorage`. It is visible, copyable and dies with the tab. Persistence that should outlive a tab is what versions are for.
-- Never write the hash from the render path. Write it when a slider is released (`gui.onFinishChange`) and when input settles, not on every frame.
+- Never write the hash from the render path. The panel reports every edit through `panel.onEdit` — dialkit commits on each drag step and each keystroke — so debounce it, and also write when input settles.
 
 ## Steps
 
@@ -27,16 +27,17 @@ It deliberately keeps the full page reload. Swapping the module in place would s
 
 ## How it works
 
-- `core/hooks.ts` exposes `hooks.panel` (runs after the panel is built, **before** the stage loads — so a restored `size` is honored by the first `stage.load`) and `keys` (a plain map; add `Backspace`).
+- `core/hooks.ts` exposes `hooks.panel` (runs after the panel is built, **before** the stage loads — so a restored `size` is honored by the first `stage.load`) and `keys` (a plain map; add `Backspace`). The hook receives the `Panel`: `folders.render/params/size` are section bodies, `addFolder(title)` makes a new one, `update()` refreshes every widget, and `onEdit` fires after any of them changed a value.
 - `App.updateHash` (core) owns `s` and `v` and **keeps every other key**, so `p` and `size` ride along untouched when core rewrites the hash.
 - At `hooks.panel` time, on a plain reload, `s` in the hash still names the current sketch; on a sidebar switch it still names the *previous* one (core rewrites it after the stage loads). That is the test for "does this `p` belong to me": restore only when `hash.s === sketch.name`, otherwise drop it.
 - `LoadedSketch.defaults` (core) is a frozen clone of the flat params as the code declared them, taken before any version or plugin writes into `params`. Reset copies it back in and calls `app.paramsChanged()`, which refreshes the widgets and redraws.
-- `updateParamsGUI` (exported from core) refreshes lil-gui after writing into `params`.
+- `updateParamsGUI(panel)` (exported from core) refreshes every widget after writing into `params`.
 
 ## Pitfalls
 
-- `gui.onFinishChange` fires for every controller in the panel, including the Size folder. That is fine: `size` is written from `sketch.size`, which the folder already changed in place.
-- Params a sketch writes during a gesture (orbit → `params.yaw`) do not go through lil-gui, so they don't fire `onFinishChange`. Wrap `app.stage.onInputEnd` to catch them, as the reference does; call the original, core relies on it.
+- `panel.onEdit` fires for every widget in the panel, including the Size section. That is fine: `size` is written from `sketch.size`, which the section already changed in place.
+- `onEdit` fires per drag step and per keystroke, not once at the end — dialkit has no change/commit split. Debounce it (the reference uses 200 ms) or the hash is rewritten dozens of times per drag.
+- Params a sketch writes during a gesture (orbit → `params.yaw`) do not go through the panel, so they don't fire `onEdit`. Wrap `app.stage.onInputEnd` to catch them, as the reference does; call the original, core relies on it.
 - `location.hash = …` does not reload the page, but it does push a history entry. Use `history.replaceState` so Back still leaves the studio.
 - Loading a version (sidebar click) writes the version's params into `sketch.params` and core rewrites `v` — the stale `p` stays in the hash until the next slider release. Clear `p`/`size` in `hooks.load` when `v` is present and the params equal the version's; or simply accept that `v` wins on the next reload because core applies the version *before* `hooks.panel` and the plugin merges `p` over it. The reference takes the second, simpler path: `p` always reflects the last thing the user touched.
 - Writing versions or exports does **not** trigger a reload (those files are not in Vite's module graph), so nothing here fires on Save or Export.
@@ -45,6 +46,7 @@ It deliberately keeps the full page reload. Swapping the module in place would s
 
 ```ts
 // plugins/hot-reload.ts
+import { mountButtonGroup } from 'dialkit/vanilla';
 import { hooks, keys, updateParamsGUI } from '../core';
 import type { App, LoadedSketch } from '../core';
 
@@ -68,7 +70,7 @@ function clear() {
   setHash(h);
 }
 
-hooks.panel.push((gui, sketch, app) => {
+hooks.panel.push((panel, sketch, app) => {
   const h = hash();
   // Core rewrites `s` only after the stage loads, so here it still says which sketch `p` was written for.
   if (h.get('s') === sketch.name && h.has('p')) {
@@ -77,19 +79,26 @@ hooks.panel.push((gui, sketch, app) => {
     for (const key of Object.keys(saved)) if (key in sketch.params) sketch.params[key] = saved[key];
     const m = /^(\d+)x(\d+)@([\d.]+)$/.exec(h.get('size') ?? '');
     if (m) Object.assign(sketch.size, { width: +m[1], height: +m[2], resolution: +m[3] });
-    updateParamsGUI(gui);
+    updateParamsGUI(panel);
   } else if (h.has('p')) clear();
 
-  gui.onFinishChange(() => write(sketch));
-  // Params a sketch writes during a gesture (orbitControl → params.yaw) bypass lil-gui.
+  // The panel commits on every drag step and keystroke; one hash write per gesture is plenty.
+  let timer: ReturnType<typeof setTimeout>;
+  const save = () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => write(sketch), 200);
+  };
+  panel.onEdit = save;
+  // Params a sketch writes during a gesture (orbitControl → params.yaw) bypass the panel.
   const inputEnd = app.stage.onInputEnd;
   app.stage.onInputEnd = () => {
     inputEnd?.();
-    write(sketch);
+    save();
   };
 
-  const render = gui.folders.find((f) => (f as any)._title === 'Render') ?? gui;
-  render.add({ reset: () => reset(app) }, 'reset').name('Reset params (Backspace)');
+  mountButtonGroup(panel.folders.render, {
+    buttons: [{ label: 'Reset params (Backspace)', onClick: () => reset(app) }],
+  });
 });
 
 // Back to what the code declares. `sketch.defaults` is frozen at load, before versions or plugins touch `params`.

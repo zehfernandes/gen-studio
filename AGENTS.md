@@ -9,12 +9,12 @@ This codebase is deliberately small so that the user — or you, on their behalf
 - **Prefer a code change over a new option.** If the user wants JPEG exports, edit `core/export.ts`; do not add `config.encoding` plus UI for it. Add a config key only when the same sketch legitimately needs both behaviours.
 - **No dialogs, no wizards, no confirmations.** One action does one obvious thing (Export picks still vs video from `config`). Errors go to the status bar and the console; the app keeps running.
 - **Core stays universal.** Anything not every user needs goes in `plugins/index.ts` or the user's fork: hot reload, GIF, batch-over-seeds, tiled prints, MIDI, three.js. When in doubt, plugin.
-- **Non-universal features ship as skills, not code.** `.agents/skills/add-*/SKILL.md` teaches the agent how to add one thing to *this* codebase (contract, steps, pitfalls, verification, reference implementation). A skill writes to `plugins/`, appends to `plugins/index.ts` or `plugins/server.ts`, runs `pnpm add`, may create an obviously-named example under `sketches/`. It never edits `core/`. If a plugin needs a hook core lacks, the hook (a registry, not the feature) is an upstream change and the skill stops and says so. Only large widgets ship as a file next to the SKILL.md (e.g. `add-curve-control`).
+- **Non-universal features ship as skills, not code.** `.agents/skills/add-*/SKILL.md` teaches the agent how to add one thing to *this* codebase (contract, steps, pitfalls, verification, reference implementation). A skill writes to `plugins/`, appends to `plugins/index.ts` or `plugins/server.ts`, runs `pnpm add`, may create an obviously-named example under `sketches/`. It never edits `core/`. A skill that needs a large widget ships it as a file next to the SKILL.md. If a plugin needs a hook core lacks, the hook (a registry, not the feature) is an upstream change and the skill stops and says so.
 - **Files are the UI.** New state should be a file or folder under `sketches/<name>/` that a human can read and delete, not app-internal storage.
 - **Filesystem only, no git.** The app never reads or writes git (no hashes, no commits). Versions store params; if the user wants to preserve code they duplicate the sketch folder. Don't reintroduce git integration.
 - **Protect determinism above all.** Same `seed` + same `frame` ⇒ same pixels, on screen and in the export. Never introduce `Date.now()`, `Math.random()`, or refresh-rate-dependent timing into the render path.
 - **Credible exit.** Keep the sketch contract plain (`draw(ctx, t, api)`, `params` a flat object). Do not wrap params in objects or require host imports inside sketches.
-- **Keep it readable.** `core/` is ~2k lines and should stay in that order of magnitude. Compact code, no speculative abstractions.
+- **Keep it readable.** `core/` is ~3k lines and should stay in that order of magnitude. Compact code, no speculative abstractions.
 
 ## Sketch module
 
@@ -44,9 +44,10 @@ export function dispose(p, api) { /* cleanup on sketch switch */ }
 ```
 
 - `params` is a plain object. The host writes into it in place when the user drags a slider.
-- `controlTypes.number` infers `step: 1` when value, `min` and `max` are all integers (lil-gui's implicit step is `(max - min) / 1000`, which would hand a sketch `count = 17.325`). An explicit `step` always wins.
+- `controlTypes.number` needs a `min` and a `max` to make a slider. A **bare number** (`seed: 1`, `margin: 15`) has neither, so it becomes a free text input that parses back to a number — the panel's only numeric widget is a slider, and a bare value has no bounds to give one. Garbage mid-edit (`''`, `'-'`, `'1e'`) keeps the last good value.
+- `controlTypes.number` infers `step: 1` when value, `min` and `max` are all integers, or `{ value: 18, min: 3, max: 48 }` would hand a sketch `count = 17.325`; floats without a `step` get `(max - min) / 1000`. An explicit `step` always wins.
 - Control hints live *inside* `params`, never in `config`. `core/controls.ts#splitParams` runs once on load: it strips `{ value, ...hints }` descriptors into `LoadedSketch.controls` and flattens `params` in place, so the sketch reads `params.count` as a plain value and versions/sidecars store flat values.
-- A widget is picked per param by `core/params.ts#addControllers`: `control.type` if set, else inferred from the value (`options` → `select`, hex → `color`, `number`, `boolean`, `string`). `controlTypes` is the registry; core's defaults live in it, so a plugin can add `controlTypes.curve` or replace `controlTypes.color`. Arrays/objects are skipped unless a `type` names a factory. `group: 'Ink'` nests a param in a subfolder of Params; folders appear where their first member is declared, ungrouped params stay at the top level.
+- A widget is picked per param by `core/params.ts#buildParamsGUI`: `control.type` if set, else inferred from **`LoadedSketch.defaults`** (`options` → `select`, hex → `color`, `number`, `boolean`, `string`). Inference reads the code's declared value, not the live one, so a version that stored a colour as `oklch(...)` still builds a colour picker. `controlTypes` is the registry; core's defaults live in it, so a plugin can add `controlTypes.curve` or replace `controlTypes.color`. Arrays/objects are skipped unless a `type` names a factory.
 - Lifecycle order: `load → setup → draw*  → dispose`. Export renderers run the same lifecycle in a hidden container. A size change reruns the whole lifecycle.
 - `p` is the renderer object (`CanvasRenderingContext2D` or `p5` instance); `t = loopT(frame, frames) = frame / frames`, so 0 ≤ t < 1 — the last frame is never a copy of frame 0 (`core/timing.ts`). Every exporter uses `loopT`, never `i / (frames - 1)`.
 - `api`: seeded `random()`/`noise()`, `seed`, `frame`, `frames`, `fps` (0 for stills), `time` (`frame / fps`), `width`, `height` (design px), `scale` (device px per design px), `tile` (`{ x, y, width, height }` design px — the window this canvas shows; the whole artwork unless an exporter tiles it), `exporting` (bool).
@@ -96,7 +97,7 @@ The p5 host camera (`hostCam`) is refitted only when canvas size or `api.tile` c
 ## Architecture
 
 - `core/` is the host. Do not put user work here unless the user is intentionally forking it.
-  - `app.ts` UI glue · `hooks.ts` `keys` map + `keyFor` + `hooks.load/panel/exported` · `validate.ts` load-time contract check · `controls.ts` inline param descriptors → hints · `stage.ts` preview loop + redraw on input · `renderers.ts` canvas2d/p5 (WebGL gets a size-independent default camera — fixed FOV, eye ∝ height — so preview = export; the export instance is deaf to window input) · `export.ts` exporters + their building blocks · `files.ts` pure naming/layer helpers · `timing.ts` frame math · `size.ts` presets + pixel math · `random.ts` seeded PRNG/noise · `server.ts` Vite middleware (fs, versions, ffmpeg) · `params.ts` lil-gui + `controlTypes` · `sidebar.ts`.
+  - `app.ts` UI glue · `hooks.ts` `keys` map + `keyFor` + `hooks.load/panel/exported` · `validate.ts` load-time contract check · `controls.ts` inline param descriptors → hints · `stage.ts` preview loop + redraw on input · `renderers.ts` canvas2d/p5 (WebGL gets a size-independent default camera — fixed FOV, eye ∝ height — so preview = export; the export instance is deaf to window input) · `export.ts` exporters + their building blocks · `files.ts` pure naming/layer helpers · `timing.ts` frame math · `size.ts` presets + pixel math · `random.ts` seeded PRNG/noise · `server.ts` Vite middleware (fs, versions, ffmpeg) · `params.ts` the dialkit panel + `controlTypes` · `sidebar.ts`.
 - `plugins/index.ts` (browser) and `plugins/server.ts` (Vite plugins, spread into `vite.config.ts`) are the extension points. `core/main.ts` imports `../plugins` before `new App()`, so plugins mutate registries at import time and get the running app later through `hooks`/`keys`.
 - `.agents/skills/` holds the `add-*` skills (open `.agents` standard, committed, inherited by forks). They are documentation for the agent, not code the app loads.
 - `sketches/` is the user's workspace. `cp -r` duplicates; rename renames; the user decides what to keep. There is no create/copy/rename in the app on purpose (it was a `+` button with two `prompt()`s; removed) — the filesystem is the UI for that.
@@ -112,12 +113,34 @@ exporters:    { still, mp4 }                                    // ExporterFacto
 presets:      { 'A4 300dpi': { width, height }, ... }
 controlTypes: { number, select, color, boolean, string }        // ControlFactory, picked by control.type
 keys:         { s, e, r, Escape, ' ', g, Enter, ArrowLeft, ArrowRight }  // (app) => void; letters lowercased, no modifiers
-hooks:        { load: [(sketch, app)], panel: [(gui, sketch, app)], exported: [(files, sketch, app)] }  // panel runs before the stage loads
+hooks:        { load: [(sketch, app)], panel: [(panel, sketch, app)], exported: [(files, sketch, app)] }  // panel runs before the stage loads
 ```
+
+### The params panel
+
+`core/params.ts` builds the panel out of [dialkit](https://www.dialkit.dev)'s individual controls (`mountSlider`, `mountToggle`, `mountSelectControl`, `mountColorControl`, `mountTextControl`, `mountButtonGroup`, `mountFolder`), not its `createDialKit` store. That is deliberate: the store turns every number into a slider, renders control types from a closed list, and mounts a presets/Copy toolbar on every panel — versions are files here, and `controlTypes` has to stay open. Mounting the controls ourselves keeps the look and drops all three.
+
+`hooks.panel` receives a `Panel`:
+
+```ts
+interface Panel {
+  element: HTMLElement;                                    // the `.dialkit-root` everything lives in
+  folders: { render: HTMLElement; params: HTMLElement; size: HTMLElement };
+  addFolder(title: string): HTMLElement;                   // a new section, returns its body
+  update(): void;                                          // re-read every widget from `params`/`size`
+  onEdit?: () => void;                                     // after any widget changed a value
+  destroy(): void;
+}
+```
+
+A `ControlFactory` is `(host, params, key, control, onChange) => { update, destroy }`. Two rules when wrapping a dialkit control:
+
+- **Some are controlled.** `mountSelectControl` and `mountToggle` call `onChange` and then sit still until the parent hands the new props back, so those re-apply their own props after a change. The slider and colour picker keep their own DOM in sync; a text input already holds what was typed, and refreshing it mid-edit moves the caret.
+- **There is no change/commit split.** Every control commits on each drag step and each keystroke. Anything expensive per edit must debounce — the Size section waits 400 ms before rerunning the lifecycle, and `add-hot-reload` debounces `onEdit` before writing the URL hash.
 
 `keyFor('app.export()')` → `'E'` finds the key bound to an action by its handler's source text; `buildParamsGUI` uses it to put the shortcut in the button label, so a plugin that rebinds a key is reflected. `hooks.exported` fires after an exporter resolves with the files it wrote (paths under `sketches/`). `App.updateHash` owns `s`/`v` in the URL hash and keeps every other key, so a plugin can park state there (`add-hot-reload` keeps `p`/`size`).
 
-An exporter is `async ({ sketch, onStatus, onProgress, signal }) => void | string[]` — resolve to the written paths so `hooks.exported` sees them. `makeExportRenderer(sketch, pixels?)` gives a hidden renderer at the export resolution (or at `pixels`, for exporters that render the artwork in pieces and set `api.tile` per draw) whose `drawFrame(frame, t)` returns the layers to write and throws if the browser dropped the canvas; `postFile`, `layerToBlob`, `sidecar`, `exportName` do the rest — the built-in `still`/`mp4` in `core/export.ts` are 20–45 lines each and the best templates. Bind it to a key with `keys.q = (app) => app.export('yourExporter')`, or to a panel button with `hooks.panel.push((gui, sketch, app) => gui.addFolder('…').add({ run: () => app.export('yourExporter') }, 'run'))`. Size presets are pixels computed once (`presets['Gallery 50x70cm'] = { width: 5906, height: 8268 }` is 500×700 mm at 300 dpi).
+An exporter is `async ({ sketch, onStatus, onProgress, signal }) => void | string[]` — resolve to the written paths so `hooks.exported` sees them. `makeExportRenderer(sketch, pixels?)` gives a hidden renderer at the export resolution (or at `pixels`, for exporters that render the artwork in pieces and set `api.tile` per draw) whose `drawFrame(frame, t)` returns the layers to write and throws if the browser dropped the canvas; `postFile`, `layerToBlob`, `sidecar`, `exportName` do the rest — the built-in `still`/`mp4` in `core/export.ts` are 20–45 lines each and the best templates. Bind it to a key with `keys.q = (app) => app.export('yourExporter')`, or to a panel button with `hooks.panel.push((panel, sketch, app) => mountButtonGroup(panel.addFolder('…'), { buttons: [{ label: 'Run', onClick: () => app.export('yourExporter') }] }))`. Size presets are pixels computed once (`presets['Gallery 50x70cm'] = { width: 5906, height: 8268 }` is 500×700 mm at 300 dpi).
 
 `App` exposes `export(name?)`, `saveVersion()`, `setSize(size?)`, `paramsChanged()`, `reseed()`, `step(delta)`, `setStatus(text)`, `loadSketch(name)`, plus `stage`, `sketch`, `gui`, `statusEl`, `abortExport`. Exporter building blocks: `makeExportRenderer`, `frameCount` (`{ fps, frames, animated }`; a still is one frame), `loopT`, `postFile`, `sidecar`, `exportName`, `layerToBlob`, `isCanvas`, `EXPORTS_DIR`. Renderer helpers: `styleCanvas`, `createRandomBackend`. Server helpers (`core/server.ts`, Node side): `SKETCHES_DIR`, `safeJoin`, `readBody`, `json`, `text`, `startFfmpeg`.
 
@@ -145,7 +168,7 @@ POST   /api/files/:path                       binary body → sketches/:path
 
 ## Skills (`.agents/skills/`)
 
-Available now: `add-three` (renderer), `add-shader` (WebGL2 fragment-shader renderer, no deps), `add-gif-export` (gifenc exporter + key `q`), `add-tiled-export` (prints beyond the GPU's canvas limit: tiles + ffmpeg stitch, no deps), `add-hot-reload` (params/size ride in the URL hash across Vite's full reload + Reset-to-defaults button/`Backspace`), `add-cli-export` (`pnpm export <sketch>` through headless Chromium; batch is a shell loop), `add-curve-control` (curve editor widget, ships a file). Each SKILL.md is self-contained: rules, steps, the core contract it implements, pitfalls, a reference implementation that typechecks against current core, and how to verify.
+Available now: `add-three` (renderer), `add-shader` (WebGL2 fragment-shader renderer, no deps), `add-gif-export` (gifenc exporter + key `q`), `add-tiled-export` (prints beyond the GPU's canvas limit: tiles + ffmpeg stitch, no deps), `add-hot-reload` (params/size ride in the URL hash across Vite's full reload + Reset-to-defaults button/`Backspace`), `add-cli-export` (`pnpm export <sketch>` through headless Chromium; batch is a shell loop). Each SKILL.md is self-contained: rules, steps, the core contract it implements, pitfalls, a reference implementation that typechecks against current core, and how to verify.
 
 When writing a new one, keep that shape, keep it to `plugins/`, end with `pnpm check` + a manual check in the running app, and make appends to `plugins/index.ts` idempotent (check the import line exists before adding).
 

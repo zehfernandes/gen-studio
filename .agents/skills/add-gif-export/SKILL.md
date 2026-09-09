@@ -19,12 +19,13 @@ An exporter is one key in the `exporters` map. This adds `exporters.gif`: it ren
 2. Write `plugins/gif-export.ts` and `plugins/gifenc.d.ts` from the reference below.
 3. Register in `plugins/index.ts`, once. Button in the Render folder, key `q` (unbound in core; `e/s/r/g/Enter/Space/Escape/←/→` are taken — see `core/hooks.ts`):
    ```ts
+   import { mountButtonGroup } from 'dialkit/vanilla';
    import gif from './gif-export';
    exporters.gif = gif;
    keys.q = (app) => app.export('gif');
-   hooks.panel.push((gui, sketch, app) => {
+   hooks.panel.push((panel, sketch, app) => {
      if (!(sketch.config.fps && sketch.config.duration)) return;
-     gui.folders.find((f) => f._title === 'Render')?.add({ gif: () => app.export('gif') }, 'gif').name('Export GIF');
+     mountButtonGroup(panel.folders.render, { buttons: [{ label: 'Export GIF (Q)', onClick: () => app.export('gif') }] });
    });
    ```
 4. Verify: `pnpm check`; `pnpm dev`, open `example-loop`, press `Q`; the status bar counts frames, then `Saved sketches/example-loop/exports/<base>.gif`. Open the GIF: it loops seamlessly at the sketch's fps and matches the preview. Press `Q` then `Escape` mid-way: "GIF export cancelled", no partial file.

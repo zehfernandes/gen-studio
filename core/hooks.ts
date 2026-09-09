@@ -1,4 +1,4 @@
-import type GUI from 'lil-gui';
+import type { Panel } from './params';
 import type { App } from './app';
 import type { LoadedSketch } from './types';
 
@@ -38,8 +38,8 @@ export function keyFor(action: string): string | undefined {
 export const hooks = {
   /** After a sketch (or a new size for it) is loaded into the stage. */
   load: [] as ((sketch: LoadedSketch, app: App) => void)[],
-  /** After the params panel is built; add folders and buttons here. Rebuilt on every sketch load. */
-  panel: [] as ((gui: GUI, sketch: LoadedSketch, app: App) => void)[],
+  /** After the params panel is built; add sections and controls here. Rebuilt on every sketch load. */
+  panel: [] as ((panel: Panel, sketch: LoadedSketch, app: App) => void)[],
   /** After an exporter wrote its files. `files` are paths under `sketches/` (`<sketch>/exports/<file>`). */
   exported: [] as ((files: string[], sketch: LoadedSketch, app: App) => void)[],
 };
